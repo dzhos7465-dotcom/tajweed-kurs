@@ -17,6 +17,11 @@
 --font-ui:'Inter',-apple-system,sans-serif;--font-ar:'Amiri','Noto Naskh Arabic',serif}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%;-moz-text-size-adjust:100%;text-size-adjust:100%}
+body.mob{overflow-x:hidden;overflow-y:auto}
+body.mob #scale-wrapper{position:static;height:auto}
+body.mob .page{min-height:auto;flex-shrink:0}
+body.mob #canvas{height:auto;min-height:1500px;border-radius:0;overflow:visible}
+body.mob .fs-btn{display:none}
 body{background:var(--bg-outer);font-family:var(--font-ui);overflow:hidden;
 background-image:radial-gradient(circle at 20% 20%,rgba(200,151,42,.06) 0,transparent 60%),
 radial-gradient(circle at 80% 80%,rgba(30,58,95,.1) 0,transparent 60%)}
@@ -1049,9 +1054,16 @@ function toggleIqlabView(box,btn){
   var on=document.getElementById(box).classList.toggle('qmode');
   document.getElementById(btn).textContent = on ? 'Обычное написание' : 'Показать как в мусхафе';
 }
-function scale(){const w=document.getElementById('scale-wrapper');
+function vw(){return Math.min(innerWidth,screen.width||innerWidth);}
+function isMob(){return vw()<900&&Math.min(innerHeight,screen.height||innerHeight)>vw();}
+function scale(){const w=document.getElementById('scale-wrapper'),c=document.getElementById('canvas');
+if(isMob()){document.body.classList.add('mob');const k=vw()/1200;
+w.style.transform='none';w.style.zoom=k;c.style.minHeight=Math.max(1500,Math.ceil(Math.min(innerHeight,screen.height||innerHeight)/k))+'px';return;}
+document.body.classList.remove('mob');w.style.zoom='';c.style.minHeight='';
 const k=Math.min(innerWidth/1200,innerHeight/1500)*0.98;
 w.style.transform='translate(-50%,-50%) scale('+k+')';}
+(function(){var _s=show;show=function(i){_s(i);if(isMob())scrollTo(0,0);};
+})();
 function toggleFS(){const e=document.documentElement;
 if(!document.fullscreenElement){(e.requestFullscreen||e.webkitRequestFullscreen)?.call(e);}
 else{(document.exitFullscreen||document.webkitExitFullscreen)?.call(document);}}
