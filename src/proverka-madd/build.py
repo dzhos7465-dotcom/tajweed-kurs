@@ -26,6 +26,7 @@ def build(mode):
                 else: d['words']=tw; d['ti']=it['wi']; d['num']=an(it['a'])
                 d['tw']=parts(w,hl)
                 if 'why' in it: d['why']=it['why']
+                if 'alt' in it: d['alt']=it['alt'][0]; d['altwhy']=it['alt'][1]
                 t['items'].append(d)
         elif T['kind'] in ('pickAya','pickWord'):
             t['items']=[]
@@ -37,7 +38,7 @@ def build(mode):
                 t['items'].append(d)
         else:
             tg={'%d:%d:%d'%(p['s'],p['a'],p['wi']):p['ans'] for p in T['targets']}
-            t['targets']=tg; t['blocks']=[]; t['order']=[]; t['wtext']={}
+            t['targets']=tg; t['alt']={'%d:%d:%d'%(p['s'],p['a'],p['wi']):list(p['alt']) for p in T['targets'] if 'alt' in p}; t['blocks']=[]; t['order']=[]; t['wtext']={}
             for s,a in T['ayat']:
                 ws=[]
                 for wi,w in enumerate(toks(s,a)):

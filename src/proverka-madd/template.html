@@ -197,11 +197,13 @@ function init(){
  S=(MODE==='k'&&load())||fresh(); render();
 }
 /* ---------- оценка ---------- */
+function okL(it,v){return v===it.ans||(it.alt&&v===it.alt)}
+function okT(t,k,v){return !t.opts||v===t.targets[k]||(t.alt&&t.alt[k]&&v===t.alt[k][0])}
 function grade(i){
  var t=D.tasks[i],a=S.ans[i],got=0,max=0;
- if(t.kind==='label'){t.items.forEach(function(it,j){max++;if(a[j]===it.ans)got++})}
+ if(t.kind==='label'){t.items.forEach(function(it,j){max++;if(okL(it,a[j]))got++})}
  else if(t.kind==='pickAya'||t.kind==='pickWord'){var g=0;t.items.forEach(function(it,j){var s=a.indexOf(j)>=0;if(it.ok){max++;if(s)g++}else if(s)g--});got=Math.max(0,g)}
- else{var g=0;max=Object.keys(t.targets).length;Object.keys(a).forEach(function(k){if(k in t.targets){if(!t.opts||a[k]===t.targets[k])g++}else g--});got=Math.max(0,g)}
+ else{var g=0;max=Object.keys(t.targets).length;Object.keys(a).forEach(function(k){if(k in t.targets){if(okT(t,k,a[k]))g++}else g--});got=Math.max(0,g)}
  return{got:got,max:max};
 }
 function answered(i){var a=S.ans[i],t=D.tasks[i];return t.kind==='label'?Object.keys(a).length>0:(Array.isArray(a)?a.length>0:Object.keys(a).length>0)}
@@ -274,9 +276,10 @@ function tLabel(t,i,ro){
  var a=S.ans[i];
  return t.items.map(function(it,j){
   var cls='card',why='';
-  if(ro){var ok=a[j]===it.ans;cls+=ok?' r-ok':' r-bad';
-   why='<div class="why '+(ok?'ok':'bad')+'">'+(ok?'<b>Верно.</b> ':(a[j]===undefined?'<b>Нет ответа.</b> ':'<b>Ошибка.</b> ')+'Правильно: <b>'+esc(it.ans)+'</b>. ')+esc(it.why||GEN[it.ans]||'')+'</div>'}
-  var ch='<div class="chips">'+t.opts.map(function(o){var c='chip';if(a[j]===o)c+=' sel';if(ro){if(o===it.ans)c+=' c-ok';else if(a[j]===o)c+=' c-bad'}
+  if(ro){var ok=okL(it,a[j]);cls+=ok?' r-ok':' r-bad';
+   if(ok&&a[j]!==it.ans)why='<div class="why ok"><b>Засчитано.</b> '+esc(it.altwhy)+'</div>';
+   else why='<div class="why '+(ok?'ok':'bad')+'">'+(ok?'<b>Верно.</b> ':(a[j]===undefined?'<b>Нет ответа.</b> ':'<b>Ошибка.</b> ')+'Правильно: <b>'+esc(it.ans)+'</b>. ')+esc(it.why||GEN[it.ans]||'')+'</div>'}
+  var ch='<div class="chips">'+t.opts.map(function(o){var c='chip';if(a[j]===o)c+=' sel';if(ro){if(o===it.ans||(a[j]===o&&okL(it,o)))c+=' c-ok';else if(a[j]===o)c+=' c-bad'}
    return '<button class="'+c+'" '+(ro?'disabled':'')+' onclick="setL('+j+',\''+o+'\')">'+esc(o)+'</button>'}).join('')+'</div>';
   return '<div class="'+cls+'"><span class="no">'+(j+1)+'</span>'+(ro?playBtn(it.au):'')+ayaHTML(it)+ch+why+'</div>';
  }).join('');
@@ -305,7 +308,7 @@ function tTap(t,i,ro){
  h+=t.blocks.map(function(b){
   return '<span class="aybl">'+b.words.map(function(w){
    var c='tap',m=w.k in a,tg=w.k in t.targets;
-   if(ro){if(m&&tg)c+=(!t.opts||a[w.k]===t.targets[w.k])?' t-ok':' t-bad';else if(m)c+=' t-bad';else if(tg)c+=' t-miss'}
+   if(ro){if(m&&tg)c+=okT(t,w.k,a[w.k])?' t-ok':' t-bad';else if(m)c+=' t-bad';else if(tg)c+=' t-miss'}
    else if(m)c+=' m';
    return '<span class="'+c+'" '+(ro?'':'onclick="togT(\''+w.k+'\')"')+'>'+w.t+'</span>';
   }).join(' ')+'<span class="num"> '+b.num+'</span></span>';
@@ -321,8 +324,9 @@ function tTap(t,i,ro){
    if(ro){if(!tg){c+=' r-bad';why='<div class="why bad"><b>Лишняя отметка.</b> Здесь нет длинного мадда из-за хамзы.</div>'}
     else if(!m){why='<div class="why"><b>Пропущено.</b> Правильно: <b>'+t.targets[k]+'</b> — '+esc(GEN[t.targets[k]])+'</div>'}
     else if(a[k]===t.targets[k]){c+=' r-ok';why='<div class="why ok"><b>Верно.</b> '+esc(GEN[t.targets[k]])+'</div>'}
+    else if(okT(t,k,a[k])){c+=' r-ok';why='<div class="why ok"><b>Засчитано.</b> '+esc(t.alt[k][1])+'</div>'}
     else{c+=' r-bad';why='<div class="why bad"><b>Вид неверный.</b> Правильно: <b>'+t.targets[k]+'</b> — '+esc(GEN[t.targets[k]])+'</div>'}}
-   var ch='<div class="chips">'+t.opts.map(function(o){var cc='chip';if(a[k]===o)cc+=' sel';if(ro&&tg){if(o===t.targets[k])cc+=' c-ok';else if(a[k]===o)cc+=' c-bad'}else if(ro&&a[k]===o)cc+=' c-bad';
+   var ch='<div class="chips">'+t.opts.map(function(o){var cc='chip';if(a[k]===o)cc+=' sel';if(ro&&tg){if(o===t.targets[k]||(a[k]===o&&okT(t,k,o)))cc+=' c-ok';else if(a[k]===o)cc+=' c-bad'}else if(ro&&a[k]===o)cc+=' c-bad';
     return '<button class="'+cc+'" '+(ro?'disabled':'')+' onclick="setT(\''+k+'\',\''+o+'\')">'+o+'</button>'}).join('')+'</div>';
    return '<div class="'+c+'" style="flex-wrap:wrap"><div class="mw">'+t.wtext[k]+'</div>'+ch+(why?'<div style="flex-basis:100%">'+why+'</div>':'')+'</div>';
   }).join('')+'</div>';
