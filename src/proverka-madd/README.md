@@ -1,0 +1,24 @@
+# Контрольная и тренажёр по мадду — исходники
+
+Готовые файлы: `proverka/madd-kontrolnaya.html` (ученикам), `proverka/madd-trenazher.html` (на уроке).
+Сайт: https://dzhos7465-dotcom.github.io/tajweed-kurs/proverka/
+
+## Пересборка
+```
+cd /tmp && GIT_LFS_SKIP_SMUDGE=1 git clone -q --depth 1 https://github.com/risan/quran-json
+cd src/proverka-madd && mkdir -p out
+python3 verify.py   # сверка всех ответов с корпусом: должно быть «ВСЁ ВЕРНО»
+python3 build.py    # → out/kontrolnaya_madd.html, out/trenazher_madd.html
+```
+Текст аятов — KFGQPC hafsData_v18, шрифт KFGQPC Uthmanic Hafs v18 встраивается в файл.
+
+## Файлы
+- `data.py` — все задания: `tasks('k')` контрольная, `tasks('t')` тренажёр. Место: `P(сура, аят, слово, ответ, hl=буквы)`, карточки: `C(...)`, `A(...)`.
+- `madd.py` — автоматическое определение вида мадда в аяте (остановка только в конце аята) — для проверки.
+- `template.html` — движок: типы заданий `label` (выбор ответа для места), `pickAya` / `pickWord` (отметить карточки), `tap` (нажать на слова в суре, по желанию с выбором вида).
+- `build.py` — сборка двух файлов из одного шаблона.
+
+## Для новой темы или другого курса
+Скопировать папку, переписать `data.py` (задания) и проверку в `verify.py`; движок `template.html` менять не нужно.
+Баллы: +1 за место, −1 за лишнюю отметку (не ниже 0 за задание), итог из 100, проходной 70.
+Контрольная хранит ответы в localStorage (ключ `madd-kontrolnaya-v1`; для новой работы — новый ключ в шаблоне), сброс — `#reset` в конце ссылки.

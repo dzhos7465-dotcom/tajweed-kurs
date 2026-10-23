@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>__TITLE__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'KFGQPC Hafs';font-display:block;src:url(data:font/woff2;base64,__FONT__) format('woff2')}
+:root{color-scheme:light only;--ink:#1a1a2e;--ink-mid:#3d3d5c;--ink-soft:#8a8aa0;--accent:#1e3a5f;--gold:#c8972a;--gold-light:#f0e0b0;--gold-bg:#fbf4e2;
+--ok:#2e7d4f;--ok-bg:#e3f2e8;--bad:#c0392b;--bad-bg:#fbe5e2;--grey:#b9b9c6;--line:#e7e3da;--bg:#faf9f7;--card:#fff;
+--font-ui:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--font-ar:'KFGQPC Hafs','Amiri',serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.5 var(--font-ui)}
+button{font-family:inherit;color:inherit}
+.wrap{max-width:680px;margin:0 auto;padding:0 16px}
+/* шапка */
+.top{position:sticky;top:0;z-index:20;background:rgba(250,249,247,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.top .wrap{padding-top:10px;padding-bottom:10px}
+.top-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top-ttl{font-weight:700;font-size:15px;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clk{color:var(--accent);font-variant-numeric:tabular-nums}
+.top-cnt{font-weight:600;font-size:15px;color:var(--ink-mid);white-space:nowrap}
+.prog{height:5px;border-radius:3px;background:var(--line);margin-top:8px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--gold);border-radius:3px;transition:width .3s}
+.dots{display:flex;justify-content:space-between;gap:3px;margin-top:9px}
+.dot{flex:1;max-width:30px;height:26px;border-radius:13px;border:1.5px solid var(--line);background:#fff;font:600 12px var(--font-ui);color:var(--ink-soft);padding:0;cursor:pointer}
+.dot.done{background:var(--gold-light);border-color:var(--gold);color:var(--ink)}
+.dot.cur{border-color:var(--accent);box-shadow:0 0 0 2px rgba(30,58,95,.15);color:var(--accent)}
+.dot.r-ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.dot.r-bad{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+/* экран задания */
+main{padding:18px 0 120px}
+body.nobar main{padding-bottom:30px}
+body.nobar .bar{display:none}
+.tnum{font-size:14px;font-weight:600;color:var(--gold);letter-spacing:.04em;text-transform:uppercase}
+h1{font-size:24px;line-height:1.25;margin:4px 0 8px;color:var(--ink)}
+.instr{font-size:17px;color:var(--ink-mid);margin:0 0 10px}
+.cond{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:500;color:var(--accent);background:#eaf0f7;border-radius:14px;padding:4px 11px;margin-bottom:14px}
+.howbtn{font-size:13.5px;font-weight:500;color:var(--ink-soft);background:none;border:none;text-decoration:underline dotted;padding:4px 6px;cursor:pointer;margin-left:4px}
+.ar{font-family:var(--font-ar);direction:rtl;text-align:center;color:var(--ink)}
+.aya{font-size:clamp(25px,7vw,33px);line-height:2.05;word-spacing:2px}
+.num{font-family:var(--font-ar);white-space:nowrap}
+.tw{text-decoration:underline;text-decoration-color:var(--gold);text-decoration-thickness:2px;text-underline-offset:10px}
+.hlm{color:#6B1D2C}
+.tw.whole{}
+/* карточки */
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:12px 14px 14px;margin:0 0 14px;position:relative;transition:border-color .2s,background .2s}
+.card .no{position:absolute;top:10px;left:12px;font:700 13px var(--font-ui);color:var(--ink-soft)}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px;margin-top:8px}
+.chip{min-height:46px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font:600 15.5px var(--font-ui);padding:6px 8px;cursor:pointer;line-height:1.2}
+.chip.sel{border-color:var(--gold);background:var(--gold-light)}
+.chip.c-ok{border-color:var(--ok);background:var(--ok-bg);color:var(--ok)}
+.chip.c-bad{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
+.chip:disabled{cursor:default}
+.card.r-ok{border-color:var(--ok)}
+.card.r-bad{border-color:var(--bad)}
+.card.r-miss{border-color:var(--ok);border-style:dashed}
+.why{font-size:15px;margin-top:10px;padding:8px 11px;border-radius:10px;background:#f4f2ee;color:var(--ink-mid)}
+.why b{color:var(--ink)}
+.why.ok b{color:var(--ok)} .why.bad b{color:var(--bad)}
+/* карточки выбора */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pick{cursor:pointer;user-select:none;-webkit-user-select:none;text-align:center;padding:14px 10px 12px}
+.pick.sel{border-color:var(--gold);background:var(--gold-bg)}
+.pick .w1{font-size:clamp(30px,9vw,40px);line-height:1.9}
+.pick.r-ok{background:var(--ok-bg)} .pick.r-bad{background:var(--bad-bg)}
+.pick.r-miss{background:#fff}
+.mark{position:absolute;top:8px;right:10px;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);background:#fff;font:700 14px/21px var(--font-ui);text-align:center;color:#fff}
+.pick.sel .mark{background:var(--gold);border-color:var(--gold)}
+.pick.sel .mark::after{content:"✓"}
+.pick.r-ok .mark{background:var(--ok);border-color:var(--ok)}
+.pick.r-bad .mark{background:var(--bad);border-color:var(--bad)}
+.pick.r-bad .mark::after{content:"✕"}
+.pick.r-miss .mark{border-color:var(--ok);border-style:dashed;background:#fff}
+.pick.r-miss .mark::after{content:""}
+.pick .why{font-size:13.5px;padding:6px 8px;text-align:left}
+.pickaya{text-align:center}
+/* текст суры с нажатием */
+.sura{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:10px 12px 14px;margin-bottom:14px}
+.sura-head{display:flex;flex-direction:column;align-items:center}
+.basm{font-family:var(--font-ar);font-size:clamp(22px,6vw,28px);text-align:center;direction:rtl;margin:0 0 4px;color:var(--ink)}
+.flow{font-size:clamp(25px,7vw,33px);line-height:2.15;text-align:justify;text-align-last:center}
+.flow .aybl{display:inline}
+.tap{cursor:pointer;border-radius:8px;transition:background .15s}
+.tap.m{background:var(--gold-light)}
+.tap.t-ok{background:var(--ok-bg);color:var(--ok)}
+.tap.t-bad{background:var(--bad-bg);color:var(--bad)}
+.tap.t-miss{text-decoration:underline dashed var(--ok);text-decoration-thickness:2px;text-underline-offset:10px}
+.flow.ro .tap{cursor:default}
+.mlist h3{font-size:16px;margin:4px 0 8px;color:var(--ink-mid)}
+.mrow{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:8px 10px;margin-bottom:10px}
+.mrow .mw{font-family:var(--font-ar);font-size:28px;line-height:1.7;min-width:90px;text-align:center;direction:rtl}
+.mrow .chips{flex:1;margin-top:0;grid-template-columns:repeat(3,1fr)}
+.mrow .chip{min-height:42px;font-size:13.5px;padding:4px}
+.mrow.r-ok{border-color:var(--ok)} .mrow.r-bad{border-color:var(--bad)}
+.empty{color:var(--ink-soft);font-size:15px;text-align:center;padding:10px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--ink-mid);margin:-4px 0 12px}
+.legend span.nos::before{display:none}
+.legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+/* нижняя панель */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.97);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.bar .wrap{display:flex;gap:10px;padding-top:10px;padding-bottom:10px}
+.btn{flex:1;min-height:52px;border-radius:14px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font:600 17px var(--font-ui);cursor:pointer}
+.btn.sec{background:#fff;color:var(--accent)}
+.btn.gold{background:var(--gold);border-color:var(--gold)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.small{flex:0 0 auto;padding:0 16px}
+/* стартовый и итоговый экраны */
+.hero{text-align:center;padding:24px 0 6px}
+.hero .ar{font-size:clamp(34px,10vw,46px);line-height:1.8}
+.hero h1{font-size:26px;margin:2px 0 4px}
+.hero .sub{color:var(--ink-mid);font-size:16px}
+.box{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px 16px;margin:16px 0}
+.box h3{margin:0 0 8px;font-size:17px}
+.box ul{margin:0;padding-left:20px} .box li{margin:4px 0;color:var(--ink-mid)}
+.box.gold{background:var(--gold-bg);border-color:var(--gold-light)}
+label.fld{display:block;font-weight:600;margin:6px 0}
+input.name{width:100%;font:500 18px var(--font-ui);padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink)}
+input.name:focus{outline:none;border-color:var(--gold)}
+.score{text-align:center;margin:6px 0 2px}
+.res-box{padding:6px 12px;margin:10px 0}
+.res-btns{display:flex;gap:10px;margin-top:14px}
+.score .big{font-size:52px;font-weight:700;line-height:1;color:var(--accent)}
+.score .of{font-size:18px;color:var(--ink-soft)}
+.verdict{display:inline-block;margin-top:10px;font-weight:700;padding:6px 16px;border-radius:16px}
+.verdict.ok{background:var(--ok-bg);color:var(--ok)} .verdict.bad{background:var(--bad-bg);color:var(--bad)}
+.who{text-align:center;color:var(--ink-mid);font-size:15px;margin-top:8px}
+table.res{width:100%;border-collapse:collapse;font-size:15px}
+table.res td{padding:5px 4px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.3}
+table.res td:last-child{text-align:right;font-weight:600;white-space:nowrap}
+table.res tr.full td:last-child{color:var(--ok)}
+table.res tr.low td:last-child{color:var(--bad)}
+.note{font-size:14px;color:var(--ink-soft);text-align:center;margin-top:10px}
+/* окно */
+.ov{position:fixed;inset:0;background:rgba(26,26,46,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:#fff;width:100%;max-width:680px;border-radius:20px 20px 0 0;padding:20px 18px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;animation:up .25s}
+@media(min-width:700px){.ov{align-items:center}.sheet{border-radius:20px;max-width:560px}}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.sheet h2{margin:0 0 10px;font-size:21px}
+.sheet p{margin:8px 0;color:var(--ink-mid)}
+.sheet .btns{display:flex;gap:10px;margin-top:16px}
+.demo{background:var(--bg);border-radius:12px;padding:10px 12px;margin:10px 0;font-size:15px;color:var(--ink-mid)}
+.play{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--gold);background:#fff;color:var(--gold);font:700 13px var(--font-ui);cursor:pointer;padding:0;flex-shrink:0}
+.play.on{background:var(--gold);color:#fff}
+.card .play{position:absolute;top:8px;right:10px}
+.aynum-play{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:6px}
+.aynum-play button{border:1.5px solid var(--gold);background:#fff;color:var(--gold);border-radius:16px;font:600 13.5px var(--font-ui);padding:4px 10px;cursor:pointer}
+.aynum-play button.on{background:var(--gold);color:#fff}
+__SURAFRAME__
+.sura-frame{gap:8px;margin:0 auto}
+.sura-frame::before,.sura-frame::after{height:62px;width:24px}
+.sura-frame span{font-family:var(--font-ar);font-weight:700;font-size:30px;line-height:1.5;color:var(--ink);direction:rtl;white-space:nowrap}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap" id="top"></div></header>
+<main><div class="wrap" id="app"></div></main>
+<footer class="bar"><div class="wrap" id="bar"></div></footer>
+<div id="ovl"></div>
+<script type="application/json" id="data">__DATA__</script>
+<script>
+var D = JSON.parse(document.getElementById('data').textContent);
+var MODE = D.mode;                // 't' — тренажёр, 'k' — контрольная
+var KEY = D.key || 'madd-kontrolnaya-v1';
+var S;                            // состояние
+var GEN = {
+ 'Табиъий':'после буквы мадда нет ни хамзы, ни сукуна — 2 счёта',
+ 'Ивад':'остановка на танвине фатх: вместо танвина читаем алиф — 2 счёта',
+ 'Бадаль':'хамза стоит перед буквой мадда в том же слове — 2 счёта',
+ 'Сыля сугра':'местоимение \u2068ه\u2069 между огласовками, следующее слово не с хамзы — 2 счёта',
+ 'Сыля кубра':'местоимение \u2068ه\u2069 между огласовками, следующее слово начинается с хамзы — 4 или 5',
+ 'Муттасиль':'хамза после буквы мадда в том же слове — 4 или 5',
+ 'Мунфасиль':'буква мадда в конце слова, следующее слово начинается с хамзы — 4 или 5',
+ 'Арид':'остановка: после буквы мадда последняя буква слова получила сукун — 2, 4 или 6',
+ 'Лин':'вав или йа с сукуном после фатхи, остановка на следующей букве — 2, 4 или 6',
+ 'Лязим':'после буквы мадда постоянный сукун или ташдид — 6 счётов',
+ 'Мухаффаф':'сукун в конце названия буквы остаётся сукуном',
+ 'Мусаккаль':'сукун в конце названия буквы сливается со следующей буквой — получается ташдид'
+};
+var HOW = {
+ label:['Выберите ответ','Под каждым аятом нажмите на правильный ответ для выделенного места. Выделенное место подчёркнуто золотом.'],
+ pickAya:['Отметьте аяты','Нажмите на карточки с подходящими аятами. Повторное нажатие снимает отметку.<br>За каждую лишнюю отметку снимается балл, поэтому не отмечайте наугад.'],
+ pickWord:['Отметьте слова','Нажмите на все подходящие слова. Повторное нажатие снимает отметку.<br>За каждую лишнюю отметку снимается балл, поэтому не отмечайте наугад.'],
+ tap:['Нажимайте на слова в тексте','Нажмите на слово — оно станет золотым. Нажмите ещё раз — отметка снимется.<br>За каждую лишнюю отметку снимается балл.'],
+ tapl:['Отметьте и назовите','1) Нажмите в суре на все нужные слова — они станут золотыми.<br>2) Под сурой появится список ваших отметок: для каждой выберите вид мадда.<br>За лишнюю отметку снимается балл; если вид выбран неверно, место не засчитывается.']
+};
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function save(){if(MODE!=='k')return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){try{var v=localStorage.getItem(KEY);return v?JSON.parse(v):null}catch(e){return null}}
+function fresh(){return{scr:'start',cur:0,ans:D.tasks.map(function(t){return t.kind==='label'?{}:(t.kind==='tap'?{}:[])}),chk:D.tasks.map(function(){return false}),how:{},name:'',t0:0,t1:0}}
+function init(){
+ if(MODE==='k'&&location.hash==='#reset'){try{localStorage.removeItem(KEY)}catch(e){}history.replaceState(null,'',location.pathname)}
+ S=(MODE==='k'&&load())||fresh(); render();
+}
+/* ---------- оценка ---------- */
+function grade(i){
+ var t=D.tasks[i],a=S.ans[i],got=0,max=0;
+ if(t.kind==='label'){t.items.forEach(function(it,j){max++;if(a[j]===it.ans)got++})}
+ else if(t.kind==='pickAya'||t.kind==='pickWord'){var g=0;t.items.forEach(function(it,j){var s=a.indexOf(j)>=0;if(it.ok){max++;if(s)g++}else if(s)g--});got=Math.max(0,g)}
+ else{var g=0;max=Object.keys(t.targets).length;Object.keys(a).forEach(function(k){if(k in t.targets){if(!t.opts||a[k]===t.targets[k])g++}else g--});got=Math.max(0,g)}
+ return{got:got,max:max};
+}
+function answered(i){var a=S.ans[i],t=D.tasks[i];return t.kind==='label'?Object.keys(a).length>0:(Array.isArray(a)?a.length>0:Object.keys(a).length>0)}
+function total(){var g=0,m=0;D.tasks.forEach(function(t,i){var r=grade(i);g+=r.got;m+=r.max});return{got:g,max:m,pct:Math.round(g/m*100)}}
+function shown(i){return MODE==='t'?S.chk[i]:S.scr==='review'}
+/* ---------- аудио (только тренажёр) ---------- */
+function two(n){return(n<10?'0':'')+n}
+function clk(){var x=Math.max(0,Math.floor((Date.now()-S.t0)/1000));return '⏱ '+Math.floor(x/60)+':'+two(x%60)}
+setInterval(function(){var e=document.getElementById('clk');if(e&&S.scr==='task')e.textContent=clk()},1000);
+var _au=null,_ab=null;
+function auStop(){if(_au){_au.pause();_au.onended=null}if(_ab)_ab.classList.remove('on');_au=_ab=null}
+function play(btn,url,ev){if(ev)ev.stopPropagation();var same=_ab===btn;auStop();if(same)return;_au=new Audio(url);_ab=btn;btn.classList.add('on');_au.onended=auStop;_au.play().catch(function(){auStop();btn.title='Нет связи с сервером аудио'})}
+function playBtn(url,cls){return MODE==='t'&&url?'<button class="play '+(cls||'')+'" onclick="play(this,\''+url+'\',event)" title="Послушать">&#9654;</button>':''}
+/* ---------- разметка арабского ---------- */
+function wordHTML(w,cls){ // w = [pre,mid,post] или строка
+ if(typeof w==='string')return '<span class="tw whole'+(cls||'')+'">'+w+'</span>';
+ return '<span class="tw'+(cls||'')+'">'+w[0]+'<span class="hlm">'+w[1]+'</span>'+w[2]+'</span>';
+}
+function ayaHTML(it){
+ var h=it.words.map(function(w,k){return k===it.ti?wordHTML(it.tw):w}).join(' ');
+ if(it.num)h+='<span class="num"> '+it.num+'</span>';
+ return '<div class="ar aya">'+h+'</div>';
+}
+/* ---------- экраны ---------- */
+function render(){auStop();renderTop();var f={start:rStart,task:rTask,result:rResult,review:rTask}[S.scr];f();window.scrollTo(0,0)}
+function renderTop(){
+ var el=document.getElementById('top'),h='<div class="top-row"><div class="top-ttl">'+esc(D.short)+'</div>';
+ if(S.scr==='task'||S.scr==='review'){h+='<div class="top-cnt">'+(MODE==='k'&&S.scr==='task'?'<span class="clk" id="clk">'+clk()+'</span> · ':'')+(S.scr==='review'?'Разбор · ':'')+'Задание '+(S.cur+1)+' из '+D.tasks.length+'</div></div>';
+  if(MODE==='k'){h+='<div class="dots">'+D.tasks.map(function(t,i){var c='dot';if(S.scr==='review'){var r=grade(i);c+=r.got===r.max?' r-ok':' r-bad'}else if(answered(i))c+=' done';if(i===S.cur)c+=' cur';return '<button class="'+c+'" onclick="go('+i+')">'+(i+1)+'</button>'}).join('')+'</div>'}
+  else h+='<div class="prog"><i style="width:'+((S.cur+(S.chk[S.cur]?1:0))/D.tasks.length*100)+'%"></i></div>';
+ }else h+='</div>';
+ el.innerHTML=h;
+}
+function bar(html){document.getElementById('bar').innerHTML=html;document.body.classList.toggle('nobar',!html)}
+function rStart(){
+ var k=MODE==='k';
+ document.getElementById('app').innerHTML='<div class="hero"><div class="ar">ٱلۡمَدُّ</div><h1>'+esc(D.title)+'</h1><div class="sub">'+D.tasks.length+' заданий по всем видам мадда</div></div>'+
+ '<div class="box gold"><h3>Как читаем</h3>Останавливаемся <b>только в конце аята</b>. Знаки остановки внутри аята не учитываем — читаем дальше.</div>'+
+ '<div class="box"><h3>Как это устроено</h3><ul>'+(k?
+  '<li>Одно задание на экран. Переходить можно вперёд и назад, номера заданий — вверху.</li><li>Ответы сохраняются на этом телефоне: можно закрыть страницу и продолжить позже.</li><li>Правильные ответы — только после кнопки «Завершить». Попытка одна.</li><li>За каждое верное место — балл, за лишнюю отметку балл снимается. Итог — из 100, проходной балл — 70.</li><li>В конце сделайте скриншот итога и отправьте преподавателю. Никакие данные никуда не отправляются.</li>':
+  '<li>Одно задание на экран: ответьте и нажмите «Проверить».</li><li>Сразу видно, что верно, а что нет, и почему. Можно послушать аят.</li><li>Любое задание можно пройти ещё раз.</li>')+'</ul></div>'+
+ '<p class="note" style="margin:0 0 14px"><a href="../" style="color:var(--accent)">← Страница курса</a></p>'+(k?'<label class="fld" for="nm">Ваше имя</label><input class="name" id="nm" autocomplete="name" placeholder="Имя и фамилия" value="'+esc(S.name)+'" oninput="S.name=this.value;document.getElementById(\'go\').disabled=!this.value.trim()">':'');
+ bar('<button class="btn gold" id="go" '+(k&&!S.name.trim()?'disabled':'')+' onclick="start()">Начать</button>');
+}
+function start(){if(MODE==='k'){S.name=S.name.trim();S.t0=Date.now()}S.scr='task';S.cur=0;save();render()}
+function go(i){S.cur=i;save();render()}
+function howKey(t){return t.kind==='tap'?(t.opts?'tapl':'tap'):t.kind}
+function showHow(k){var h=HOW[k];document.getElementById('ovl').innerHTML='<div class="ov" onclick="if(event.target===this)closeOv()"><div class="sheet"><h2>Как отвечать: '+h[0].toLowerCase()+'</h2><p>'+h[1]+'</p><div class="btns"><button class="btn gold" onclick="closeOv()">Понятно</button></div></div></div>'}
+function closeOv(){document.getElementById('ovl').innerHTML=''}
+function rTask(){
+ var i=S.cur,t=D.tasks[i],ro=shown(i),h='';
+ h+='<div class="tnum">Задание '+(i+1)+'</div><h1>'+esc(t.title)+'</h1><p class="instr">'+esc(t.instr)+'</p>';
+ h+='<div><span class="cond">⏸ Остановка — только в конце аята</span><button class="howbtn" onclick="showHow(\''+howKey(t)+'\')">Как отвечать?</button></div>';
+ if(ro){var r=grade(i);h+='<div class="box '+(r.got===r.max?'':'gold')+'" style="margin-top:0"><b>Верно '+r.got+' из '+r.max+'</b>'+(r.got===r.max?' — отлично!':'')+'</div>';
+  h+='<div class="legend"><span style="--c:var(--ok)">верно</span><span style="--c:var(--bad)">ошибка</span>'+(t.kind!=='label'?'<span class="nos">пунктир — пропущено</span>':'')+'</div>'}
+ h+={label:tLabel,pickAya:tPick,pickWord:tPick,tap:tTap}[t.kind](t,i,ro);
+ document.getElementById('app').innerHTML=h;
+ // кнопки
+ var last=i===D.tasks.length-1;
+ if(S.scr==='review')bar('<button class="btn sec small" '+(i?'':'disabled')+' onclick="go('+(i-1)+')">‹</button><button class="btn sec" onclick="S.scr=\'result\';render()">К итогу</button><button class="btn sec small" '+(last?'disabled':'')+' onclick="go('+(i+1)+')">›</button>');
+ else if(MODE==='t'){if(!S.chk[i])bar('<button class="btn gold" onclick="check()">Проверить</button>');
+  else bar('<button class="btn sec" onclick="redo()">Ещё раз</button><button class="btn" onclick="'+(last?'finish()':'go('+(i+1)+')')+'">'+(last?'Итог':'Дальше')+'</button>')}
+ else bar('<button class="btn sec small" '+(i?'':'disabled')+' onclick="go('+(i-1)+')">‹ Назад</button>'+(last?'<button class="btn gold" onclick="askFinish()">Завершить</button>':'<button class="btn" onclick="go('+(i+1)+')">Дальше ›</button>'));
+ if(!ro&&!S.how[howKey(t)]){S.how[howKey(t)]=1;save();showHow(howKey(t))}
+}
+function check(){S.chk[S.cur]=true;render()}
+function redo(){var t=D.tasks[S.cur];S.ans[S.cur]=t.kind==='label'||t.kind==='tap'?{}:[];S.chk[S.cur]=false;render()}
+/* тип 1: выбор ответа для каждого места */
+function tLabel(t,i,ro){
+ var a=S.ans[i];
+ return t.items.map(function(it,j){
+  var cls='card',why='';
+  if(ro){var ok=a[j]===it.ans;cls+=ok?' r-ok':' r-bad';
+   why='<div class="why '+(ok?'ok':'bad')+'">'+(ok?'<b>Верно.</b> ':(a[j]===undefined?'<b>Нет ответа.</b> ':'<b>Ошибка.</b> ')+'Правильно: <b>'+esc(it.ans)+'</b>. ')+esc(it.why||GEN[it.ans]||'')+'</div>'}
+  var ch='<div class="chips">'+t.opts.map(function(o){var c='chip';if(a[j]===o)c+=' sel';if(ro){if(o===it.ans)c+=' c-ok';else if(a[j]===o)c+=' c-bad'}
+   return '<button class="'+c+'" '+(ro?'disabled':'')+' onclick="setL('+j+',\''+o+'\')">'+esc(o)+'</button>'}).join('')+'</div>';
+  return '<div class="'+cls+'"><span class="no">'+(j+1)+'</span>'+(ro?playBtn(it.au):'')+ayaHTML(it)+ch+why+'</div>';
+ }).join('');
+}
+function setL(j,o){var a=S.ans[S.cur];if(a[j]===o)delete a[j];else a[j]=o;save();rTask();renderTop()}
+/* тип 2: отметить карточки */
+function tPick(t,i,ro){
+ var a=S.ans[i];
+ var h='<div class="'+(t.kind==='pickWord'?'grid':'')+'">';
+ h+=t.items.map(function(it,j){
+  var s=a.indexOf(j)>=0,cls='card pick'+(t.kind==='pickAya'?' pickaya':''),why='';
+  if(ro){if(it.ok&&s)cls+=' r-ok';else if(it.ok)cls+=' r-miss';else if(s){cls+=' r-bad';why='<div class="why">'+esc(it.why||'')+'</div>'}}
+  else if(s)cls+=' sel';
+  var body=t.kind==='pickWord'?'<div class="ar w1">'+(typeof it.tw==='string'?it.tw:it.tw.join(''))+'</div>':ayaHTML(it);
+  if(ro&&it.ok&&!s)why='<div class="why">Это место нужно было отметить.</div>';
+  return '<div class="'+cls+'" '+(ro?'':'onclick="togP('+j+')"')+'><span class="mark"></span>'+(ro&&MODE==='t'&&it.au?'<button class="play" style="position:absolute;top:8px;left:10px" onclick="play(this,\''+it.au+'\',event)">&#9654;</button>':'')+body+why+'</div>';
+ }).join('');
+ return h+'</div>';
+}
+function togP(j){var a=S.ans[S.cur],k=a.indexOf(j);if(k>=0)a.splice(k,1);else a.push(j);save();rTask();renderTop()}
+/* тип 3: нажатие на слова в суре */
+function tTap(t,i,ro){
+ var a=S.ans[i],h='<div class="sura">';
+ if(t.sura)h+='<div class="sura-head"><div class="sura-frame"><span>'+t.sura+'</span></div>'+(t.basmala?'<div class="basm">'+t.basmala+'</div>':'')+'</div>';
+ h+='<div class="ar flow'+(ro?' ro':'')+'">';
+ h+=t.blocks.map(function(b){
+  return '<span class="aybl">'+b.words.map(function(w){
+   var c='tap',m=w.k in a,tg=w.k in t.targets;
+   if(ro){if(m&&tg)c+=(!t.opts||a[w.k]===t.targets[w.k])?' t-ok':' t-bad';else if(m)c+=' t-bad';else if(tg)c+=' t-miss'}
+   else if(m)c+=' m';
+   return '<span class="'+c+'" '+(ro?'':'onclick="togT(\''+w.k+'\')"')+'>'+w.t+'</span>';
+  }).join(' ')+'<span class="num"> '+b.num+'</span></span>';
+ }).join(' ')+'</div>';
+ if(ro&&MODE==='t')h+='<div class="aynum-play">'+t.blocks.map(function(b){return '<button onclick="play(this,\''+b.au+'\',event)">▶ аят '+b.n+'</button>'}).join('')+'</div>';
+ h+='</div>';
+ if(t.opts){
+  var keys=t.order.filter(function(k){return k in a||(ro&&k in t.targets)});
+  h+='<div class="mlist"><h3>'+(ro?'Разбор отметок':'Ваши отметки')+'</h3>';
+  if(!keys.length)h+='<div class="empty">Нажмите на слова в суре — они появятся здесь.</div>';
+  h+=keys.map(function(k){
+   var c='mrow',why='',tg=k in t.targets,m=k in a;
+   if(ro){if(!tg){c+=' r-bad';why='<div class="why bad"><b>Лишняя отметка.</b> Здесь нет длинного мадда из-за хамзы.</div>'}
+    else if(!m){why='<div class="why"><b>Пропущено.</b> Правильно: <b>'+t.targets[k]+'</b> — '+esc(GEN[t.targets[k]])+'</div>'}
+    else if(a[k]===t.targets[k]){c+=' r-ok';why='<div class="why ok"><b>Верно.</b> '+esc(GEN[t.targets[k]])+'</div>'}
+    else{c+=' r-bad';why='<div class="why bad"><b>Вид неверный.</b> Правильно: <b>'+t.targets[k]+'</b> — '+esc(GEN[t.targets[k]])+'</div>'}}
+   var ch='<div class="chips">'+t.opts.map(function(o){var cc='chip';if(a[k]===o)cc+=' sel';if(ro&&tg){if(o===t.targets[k])cc+=' c-ok';else if(a[k]===o)cc+=' c-bad'}else if(ro&&a[k]===o)cc+=' c-bad';
+    return '<button class="'+cc+'" '+(ro?'disabled':'')+' onclick="setT(\''+k+'\',\''+o+'\')">'+o+'</button>'}).join('')+'</div>';
+   return '<div class="'+c+'" style="flex-wrap:wrap"><div class="mw">'+t.wtext[k]+'</div>'+ch+(why?'<div style="flex-basis:100%">'+why+'</div>':'')+'</div>';
+  }).join('')+'</div>';
+ }else if(ro){
+  h+=Object.keys(t.targets).filter(function(k){return !(k in a)}).length?'<div class="why">Пунктиром подчёркнуты места, которые нужно было отметить.</div>':'';
+ }
+ return h;
+}
+function togT(k){var a=S.ans[S.cur];if(k in a)delete a[k];else a[k]=null;save();rTask();renderTop()}
+function setT(k,o){var a=S.ans[S.cur];a[k]=a[k]===o?null:o;save();rTask()}
+/* ---------- завершение ---------- */
+function askFinish(){
+ var un=D.tasks.map(function(t,i){return answered(i)?0:i+1}).filter(Boolean);
+ document.getElementById('ovl').innerHTML='<div class="ov"><div class="sheet"><h2>Завершить контрольную?</h2>'+(un.length?'<p>Без ответа задания: <b>'+un.join(', ')+'</b>.</p>':'<p>На все задания есть ответы.</p>')+'<p>После завершения изменить ответы будет нельзя.</p><div class="btns"><button class="btn sec" onclick="closeOv()">Вернуться</button><button class="btn gold" onclick="closeOv();finish()">Завершить</button></div></div></div>';
+}
+function finish(){if(MODE==='k'){S.t1=Date.now();S.scr='result'}else S.scr='result';save();render()}
+
+function rResult(){
+ var T=total(),pass=T.pct>=70,h='<div class="hero" style="padding:0"><h1 style="font-size:22px">'+(MODE==='k'?'Итог контрольной':'Итог тренажёра')+'</h1></div>';
+ h+='<div class="score"><div class="big">'+T.pct+'</div><div class="of">из 100 баллов</div>'+(MODE==='k'?'<div class="verdict '+(pass?'ok':'bad')+'">'+(pass?'Контрольная сдана':'Ниже проходного балла (70)')+'</div>':'')+'</div>';
+ if(MODE==='k'){var d=new Date(S.t1),m=Math.round((S.t1-S.t0)/60000);
+  h+='<div class="who"><b>'+esc(S.name)+'</b><br>'+two(d.getDate())+'.'+two(d.getMonth()+1)+'.'+d.getFullYear()+', '+two(d.getHours())+':'+two(d.getMinutes())+' · '+(m<1?'меньше минуты':m+' мин')+'</div>'}
+ h+='<div class="box res-box"><table class="res">'+D.tasks.map(function(t,i){var r=grade(i);return '<tr class="'+(r.got===r.max?'full':(r.got/r.max<.5?'low':''))+'"><td>'+(i+1)+'. '+esc(t.title)+'</td><td>'+r.got+' из '+r.max+'</td></tr>'}).join('')+'</table></div>';
+ if(MODE==='k')h+='<div class="note">Сделайте скриншот этого экрана и отправьте преподавателю.</div>';
+ h+='<div class="res-btns">'+(MODE==='k'?'<button class="btn" onclick="S.scr=\'review\';S.cur=0;render()">Посмотреть ошибки</button>':'<button class="btn sec" onclick="S=fresh();S.scr=\'task\';render()">Пройти заново</button><button class="btn" onclick="S.scr=\'task\';S.cur=0;render()">К заданиям</button>')+'</div>';
+ document.getElementById('app').innerHTML=h;
+ bar('');
+}
+init();
+</script>
+</body>
+</html>
