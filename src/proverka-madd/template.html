@@ -196,8 +196,11 @@ function save(){if(MODE!=='k')return;try{localStorage.setItem(KEY,JSON.stringify
 function load(){try{var v=localStorage.getItem(KEY);return v?JSON.parse(v):null}catch(e){return null}}
 function fresh(){return{scr:'start',cur:0,ans:D.tasks.map(function(t){return t.kind==='label'?{}:(t.kind==='tap'?{}:[])}),chk:D.tasks.map(function(){return false}),how:{},name:'',t0:0,t1:0}}
 function init(){
- if(MODE==='k'&&location.hash==='#reset'){try{localStorage.removeItem(KEY)}catch(e){}history.replaceState(null,'',location.pathname)}
- S=(MODE==='k'&&load())||fresh(); render();
+ var h=location.hash,re=false,old=MODE==='k'?load():null;
+ if(MODE==='k'&&h==='#reset'){try{localStorage.removeItem(KEY)}catch(e){}old=null}
+ if(MODE==='k'&&h==='#peresdacha'&&!(old&&old.retake)&&!(old&&!old.t1&&old.scr!=='start')){try{localStorage.removeItem(KEY)}catch(e){}old=null;re=true}
+ if(h)history.replaceState(null,'',location.pathname);
+ S=old||fresh(); if(re)S.retake=true; render();
 }
 /* ---------- оценка ---------- */
 function okL(it,v){return v===it.ans||(it.alt&&v===it.alt)}
@@ -234,7 +237,7 @@ function ayaHTML(it){
 /* ---------- экраны ---------- */
 function render(){auStop();renderTop();var f={start:rStart,task:rTask,result:rResult,review:rTask}[S.scr];f();window.scrollTo(0,0)}
 function renderTop(){
- var el=document.getElementById('top'),h='<div class="top-row"><div class="top-ttl">'+esc(D.short)+'</div>';
+ var el=document.getElementById('top'),h='<div class="top-row"><div class="top-ttl">'+esc(D.short)+(S.retake?' · пересдача':'')+'</div>';
  if(S.scr==='task'||S.scr==='review'){h+='<div class="top-cnt">'+(MODE==='k'&&S.scr==='task'?'<span class="clk" id="clk">'+clk()+'</span> · ':'')+(S.scr==='review'?'Разбор · ':'')+'Задание '+(S.cur+1)+' из '+D.tasks.length+'</div></div>';
   if(MODE==='k'){h+='<div class="dots">'+D.tasks.map(function(t,i){var c='dot';if(S.scr==='review'){var r=grade(i);c+=r.got===r.max?' r-ok':' r-bad'}else if(answered(i))c+=' done';if(i===S.cur)c+=' cur';return '<button class="'+c+'" onclick="go('+i+')">'+(i+1)+'</button>'}).join('')+'</div>'}
   else h+='<div class="prog"><i style="width:'+((S.cur+(S.chk[S.cur]?1:0))/D.tasks.length*100)+'%"></i></div>';
@@ -244,7 +247,7 @@ function renderTop(){
 function bar(html){document.getElementById('bar').innerHTML=html;document.body.classList.toggle('nobar',!html)}
 function rStart(){
  var k=MODE==='k';
- document.getElementById('app').innerHTML='<div class="hero"><div class="ar">ٱلۡمَدُّ</div><h1>'+esc(D.title)+'</h1><div class="sub">'+D.tasks.length+' заданий по всем видам мадда</div></div>'+
+ document.getElementById('app').innerHTML='<div class="hero"><div class="ar">ٱلۡمَدُّ</div><h1>'+esc(D.title)+(S.retake?' · пересдача':'')+'</h1><div class="sub">'+D.tasks.length+' заданий по всем видам мадда</div></div>'+
  '<div class="box gold"><h3>Как читаем</h3>Останавливаемся <b>только в конце аята</b>. Знаки остановки внутри аята не учитываем — читаем дальше.</div>'+
  '<div class="box"><h3>Как это устроено</h3><ul>'+(k?
   '<li>Одно задание на экран. Переходить можно вперёд и назад, номера заданий — вверху.</li><li>Ответы сохраняются на этом телефоне: можно закрыть страницу и продолжить позже.</li><li>Правильные ответы — только после кнопки «Завершить». Попытка одна.</li><li>За каждое верное место — балл, за лишнюю отметку балл снимается. Итог — из 100 баллов и оценка от 2 до 5. Контрольная сдана от 50 баллов (оценка 3− и выше).</li><li>В конце сделайте скриншот итога и отправьте преподавателю. Никакие данные никуда не отправляются.</li>':
@@ -349,7 +352,7 @@ function askFinish(){
 function finish(){if(MODE==='k'){S.t1=Date.now();S.scr='result'}else S.scr='result';save();render()}
 
 function rResult(){
- var T=total(),M=mark(T.pct),pass=T.pct>=50,h='<div class="hero" style="padding:0"><h1 style="font-size:22px">'+(MODE==='k'?'Итог контрольной':'Итог тренажёра')+'</h1></div>';
+ var T=total(),M=mark(T.pct),pass=T.pct>=50,h='<div class="hero" style="padding:0"><h1 style="font-size:22px">'+(MODE==='k'?(S.retake?'Итог пересдачи':'Итог контрольной'):'Итог тренажёра')+'</h1></div>';
  h+='<div class="score"><div class="grade g'+M.charAt(0)+'">'+M.replace('-','−')+'</div><div class="of"><b>'+T.pct+'</b> из 100 баллов</div>'+(MODE==='k'?'<div class="verdict '+(pass?'ok':'bad')+'">'+(pass?'Контрольная сдана':'Не сдано: нужно 50 баллов')+'</div>':'')+'</div>';
  if(MODE==='k'){var d=new Date(S.t1),m=Math.round((S.t1-S.t0)/60000);
   h+='<div class="who"><b>'+esc(S.name)+'</b><br>'+two(d.getDate())+'.'+two(d.getMonth()+1)+'.'+d.getFullYear()+', '+two(d.getHours())+':'+two(d.getMinutes())+' · '+(m<1?'меньше минуты':m+' мин')+'</div>'}
