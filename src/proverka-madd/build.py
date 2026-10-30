@@ -1,12 +1,21 @@
-import json, sys, data, tk
+import json, sys, data, tk, unicodedata
 from data import toks, segs
 AR='٠١٢٣٤٥٦٧٨٩'
 def an(n): return ''.join(AR[int(c)] for c in str(n))
 AU='https://everyayah.com/data/Husary_Muallim_128kbps/%03d%03d.mp3'
 WBW='https://audio.qurancdn.com/wbw/%03d_%03d_%03d.mp3'
+NONLEFT=set('\u0627\u0623\u0625\u0622\u0671\u062f\u0630\u0631\u0632\u0648\u0624\u0629\u0649\u0621\u06e5\u06e6')
+def _joins(t):
+    """соединяется ли последняя буква куска со следующей"""
+    base=[c for c in t if not (unicodedata.combining(c) or c in '\u0670\u06e1\u0653\u0654')]
+    return bool(base) and base[-1] not in NONLEFT
 def parts(w,hl):
     if not hl: return w
-    sg=segs(w); return [''.join(sg[:hl[0]]),''.join(sg[hl[0]:hl[1]]),''.join(sg[hl[1]:])]
+    sg=segs(w); a,b,c=''.join(sg[:hl[0]]),''.join(sg[hl[0]:hl[1]]),''.join(sg[hl[1]:])
+    Z='\u200d'   # ZWJ: Safari/iPhone иначе рвёт связь букв на границе цветного куска
+    if a and b and _joins(a): a+=Z; b=Z+b
+    if b and c and _joins(b): b+=Z; c=Z+c
+    return [a,b,c]
 def last_h(w):
     sg=segs(w); i=max(k for k,x in enumerate(sg) if x[0]=='ه'); j=i+1
     while j<len(sg) and sg[j][0] in 'ۥۦ': j+=1
