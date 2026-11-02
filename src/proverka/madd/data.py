@@ -1,63 +1,10 @@
 # data.py — задания тренажёра и контрольной по мадду; текст из hafsData_v18, проверка по корпусу
 import unicodedata as u, re, json
+import os, sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'engine'))
 import tk, madd
+from common import toks, sk, segs, find_word, hl_range, P, C, A
 
-def toks(s, a): return tk.aya18(s, a).split(' ')
-
-def sk(w):
-    w = w.replace('آ', 'آ')
-    return ''.join(c for c in w if not u.combining(c) and c not in 'ـۥۦ' and c.isalpha()).replace('ٱ', 'ا').replace('ى', 'ي')
-
-def segs(w):
-    out = []
-    for ch in w:
-        if (u.combining(ch) or ch in 'ٰۡٓٔ') and out: out[-1] += ch
-        else: out.append(ch)
-    return out
-
-def find_word(s, a, word, occ=0):
-    t = toks(s, a); hits = [i for i, x in enumerate(t) if sk(x) == sk(word)]
-    assert len(hits) > occ, 'нет слова %s в %d:%d' % (word, s, a)
-    return hits[occ]
-
-def hl_range(w, part, pocc=0):
-    """диапазон сегментов слова w, чьи буквы образуют part (по скелету)."""
-    sg = segs(w); base = [sk(x) for x in sg]
-    target = sk(part); found = []
-    for i in range(len(sg)):
-        acc = ''
-        for j in range(i, len(sg)):
-            acc += base[j]
-            if acc == target and base[i] and base[j]:
-                k = j + 1
-                while k < len(sg) and sg[k][0] in '\u06e5\u06e6': k += 1
-                found.append((i, k)); break
-            if len(acc) >= len(target): break
-    assert len(found) > pocc, 'нет части %s в %s' % (part, w)
-    return found[pocc]
-
-def P(s, a, word, ans, hl=None, occ=0, pocc=0, why=None, ctx=None, alt=None):
-    """Место в аяте. ctx — (from,to) номера слов для показа отрывка вместо целого аята."""
-    wi = find_word(s, a, word, occ); w = toks(s, a)[wi]
-    d = dict(s=s, a=a, wi=wi, ans=ans)
-    if hl: d['hl'] = hl_range(w, hl, pocc)
-    if why: d['why'] = why
-    if ctx: d['ctx'] = ctx
-    if alt: d['alt'] = alt
-    return d
-
-def C(s, a, word, ok, why=None, occ=0):
-    """Карточка-слово для выбора."""
-    wi = find_word(s, a, word, occ)
-    d = dict(s=s, a=a, wi=wi, ok=ok)
-    if why: d['why'] = why
-    return d
-
-def A(s, a, ok, why=None):
-    """Карточка-аят для выбора (последнее слово подчёркнуто)."""
-    d = dict(s=s, a=a, wi=len(toks(s, a)) - 1, ok=ok)
-    if why: d['why'] = why
-    return d
 
 KL = ['Короткий', 'Длинный']
 CNT = ['2', '4 или 5', '2, 4 или 6', '6']
@@ -112,7 +59,7 @@ def tasks(mode):
                C(112,1,'أَحَدٌ',False,'после хамзы нет буквы мадда'),
                C(110,1,'جَآءَ',False,'хамза после буквы мадда — это муттасиль')]))
     # 5 — сыля
-    T.append(dict(kind='label', key='sl', title='Сыля: малая, большая или её нет?',
+    T.append(dict(kind='label', key='sl', hl_h=True, title='Сыля: малая, большая или её нет?',
         instr='Для каждого выделенного местоимения ه выберите вид сыли.', opts=SILA,
         items=[P(89,15,'فَأَكۡرَمَهُۥ','Сыля сугра'),
                P(89,16,'عَلَيۡهِ','Сыли нет',why='перед ه сукун (يۡ) — сыли нет'),
