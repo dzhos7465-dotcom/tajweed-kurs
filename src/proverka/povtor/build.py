@@ -6,4 +6,4 @@ from common import build_work
 build_work(data.tasks, [
     ('t', 'povtor-trenazher.html', 'Тренажёр: встреча двух сукунов, знаки остановки, три идгама', 'Повторение · Тренажёр'),
 ], key='povtor-trenazher-v1', hero='ٱلۡمُرَاجَعَةُ', sub='заданий: встреча двух сукунов, знаки остановки, три идгама',
-   group=False, gen=data.GEN)
+   group=False, gen=data.GEN, nocond=True)

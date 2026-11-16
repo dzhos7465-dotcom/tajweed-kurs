@@ -101,11 +101,12 @@ def _task(T):
             if T.get('hl_h'): hl = last_h(w)
             d = dict(ans=it['ans'], au=AU % (it['s'], it['a']))
             if 'ctx' in it:
-                f, to = it['ctx']; d['words'] = tw[f-1:to]; d['ti'] = it['wi'] - (f-1); d['num'] = None
+                f, to = it['ctx']; d['words'] = tw[f-1:to]; d['ti'] = it['wi'] - (f-1); d['num'] = an(it['a']) if to == len(tw) else None
             else: d['words'] = tw; d['ti'] = it['wi']; d['num'] = an(it['a'])
             d['tw'] = parts(w, hl)
             if 'why' in it: d['why'] = it['why']
             if 'alt' in it: d['alt'] = it['alt'][0]; d['altwhy'] = it['alt'][1]
+            if 'pre' in it: d['pre'] = it['pre']
             t['items'].append(d)
     elif T['kind'] in ('pickAya', 'pickWord'):
         t['items'] = []

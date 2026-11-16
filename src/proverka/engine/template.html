@@ -166,6 +166,10 @@ __SURAFRAME__
 .sura-frame{gap:8px;margin:0 auto}
 .sura-frame::before,.sura-frame::after{height:62px;width:24px}
 .sura-frame span{font-family:var(--font-ar);font-weight:700;font-size:30px;line-height:1.5;color:var(--ink);direction:rtl;white-space:nowrap}
+.sign{display:flex;justify-content:center;align-items:center;gap:12px;margin:0 0 6px;font-size:14px;color:var(--ink-soft)}
+.sign svg{height:56px;width:auto}
+.aya{overflow-wrap:anywhere}
+.chip{hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word;min-width:0}
 </style>
 </head>
 <body>
@@ -243,9 +247,10 @@ function wordHTML(w,cls){ // w = [pre,mid,post] или строка
  return '<span class="tw'+(cls||'')+'">'+w[0]+'<span class="hlm">'+w[1]+'</span>'+w[2]+'</span>';
 }
 function ayaHTML(it){
+ var pre=it.pre?'<div class="sign">'+it.pre+'</div>':'';
  var h=it.words.map(function(w,k){return k===it.ti?wordHTML(it.tw):w}).join(' ');
  if(it.num)h+='<span class="num"> '+it.num+'</span>';
- return '<div class="ar aya">'+h+'</div>';
+ return pre+'<div class="ar aya">'+h+'</div>';
 }
 /* ---------- экраны ---------- */
 function render(){auStop();closeOv();renderTop();var f={start:rStart,task:rTask,result:rResult,review:rTask}[S.scr];f();window.scrollTo(0,0)}
@@ -278,7 +283,7 @@ function closeOv(){document.getElementById('ovl').innerHTML=''}
 function rTask(){
  var i=S.cur,t=D.tasks[i],ro=shown(i),h='';
  h+='<div class="tnum">Задание '+(i+1)+'</div><h1>'+esc(t.title)+'</h1><p class="instr">'+esc(t.instr)+'</p>';
- h+='<div><span class="cond">⏸ Остановка — только в конце аята</span><button class="howbtn" onclick="showHow(\''+howKey(t)+'\')">Как отвечать?</button></div>';
+ h+='<div>'+(D.nocond?'':'<span class="cond">⏸ Остановка — только в конце аята</span>')+'<button class="howbtn" onclick="showHow(\''+howKey(t)+'\')">Как отвечать?</button></div>';
  if(ro){var r=grade(i);h+='<div class="box '+(r.got===r.max?'':'gold')+'" style="margin-top:0"><b>Верно '+r.got+' из '+r.max+'</b>'+(r.got===r.max?' — отлично!':'')+'</div>';
   h+='<div class="legend"><span style="--c:var(--ok)">верно</span><span style="--c:var(--bad)">ошибка</span>'+(t.kind!=='label'?'<span class="nos">пунктир — пропущено</span>':'')+'</div>'}
  h+={label:tLabel,pickAya:tPick,pickWord:tPick,tap:tTap}[t.kind](t,i,ro);
