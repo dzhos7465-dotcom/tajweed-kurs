@@ -146,6 +146,9 @@ table.res td{padding:5px 4px;border-bottom:1px solid var(--line);font-size:14px;
 table.res td:last-child{text-align:right;font-weight:600;white-space:nowrap}
 table.res tr.full td:last-child{color:var(--ok)}
 table.res tr.low td:last-child{color:var(--bad)}
+table.res.parts td{font-size:16px;padding:7px 4px}
+table.res th{text-align:left;font-size:13px;color:var(--accent);padding:10px 4px 3px}
+details.res-box summary{cursor:pointer;font-weight:600;padding:8px 0;color:var(--accent)}
 .note{font-size:14px;color:var(--ink-soft);text-align:center;margin-top:10px}
 /* окно */
 .ov{position:fixed;inset:0;background:rgba(26,26,46,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
@@ -379,7 +382,12 @@ function rResult(){
  h+='<div class="score"><div class="mark-wrap"><svg viewBox="0 0 170 140"><path d="M128 22 C 98 6, 40 10, 20 44 C 4 74, 26 118, 82 126 C 136 132, 166 100, 158 62 C 152 34, 120 18, 90 20"/></svg><div class="hand">'+M.charAt(0)+(M.length>1?'<sup>–</sup>':'')+'</div></div><div class="of"><b>'+T.pct+'</b> из 100 баллов</div>'+(MODE==='k'?'<div class="verdict '+(pass?'ok':'bad')+'">'+(pass?'Контрольная сдана':'Не сдано: нужно 50 баллов')+'</div>':'')+'</div>';
  if(MODE==='k'){var d=new Date(S.t1),m=Math.round((S.t1-S.t0)/60000);
   h+='<div class="who"><b>'+esc(S.name)+(S.group?' · группа '+esc(S.group):'')+'</b><br>'+two(d.getDate())+'.'+two(d.getMonth()+1)+'.'+d.getFullYear()+', '+two(d.getHours())+':'+two(d.getMinutes())+' · '+(m<1?'меньше минуты':m+' мин')+'</div>'}
- h+='<div class="box res-box"><table class="res">'+D.tasks.map(function(t,i){var r=grade(i);return '<tr class="'+(r.got===r.max?'full':(r.got/r.max<.5?'low':''))+'"><td>'+(i+1)+'. '+esc(t.title)+'</td><td>'+r.got+' из '+r.max+'</td></tr>'}).join('')+'</table></div>';
+ var rows=D.tasks.map(function(t,i){var r=grade(i);return '<tr class="'+(r.got===r.max?'full':(r.got/r.max<.5?'low':''))+'"><td>'+(i+1)+'. '+esc(t.title)+'</td><td>'+r.got+' из '+r.max+'</td></tr>'});
+ if(D.parts){ /* итог по частям работы: [название, первое задание, последнее задание] (с 0) */
+  h+='<div class="box res-box"><table class="res parts">'+D.parts.map(function(p){var g=0,m=0;for(var i=p[1];i<=p[2];i++){var r=grade(i);g+=r.got;m+=r.max}var q=Math.round(g/m*100);
+   return '<tr class="'+(q>=90?'full':(q<50?'low':''))+'"><td>'+esc(p[0])+'</td><td>'+q+' %</td></tr>'}).join('')+'</table></div>';
+  h+='<details class="box res-box"><summary>Баллы по заданиям</summary><table class="res">'+D.parts.map(function(p){return '<tr><th colspan="2">'+esc(p[0])+'</th></tr>'+rows.slice(p[1],p[2]+1).join('')}).join('')+'</table></details>';
+ } else h+='<div class="box res-box"><table class="res">'+rows.join('')+'</table></div>';
  if(MODE==='k')h+='<div class="note">Сделайте скриншот этого экрана и отправьте преподавателю.</div>';
  h+='<div class="res-btns">'+(MODE==='k'?'<button class="btn" onclick="S.scr=\'review\';S.cur=0;render()">Посмотреть ошибки</button>':'<button class="btn sec" onclick="S=fresh();S.scr=\'task\';render()">Пройти заново</button><button class="btn" onclick="S.scr=\'task\';S.cur=0;render()">К заданиям</button>')+'</div>';
  document.getElementById('app').innerHTML=h;
