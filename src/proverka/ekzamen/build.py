@@ -15,3 +15,14 @@ for a, b in [('Итог контрольной', 'Итог экзамена'), (
              ('Контрольная сдана от 50 баллов', 'Экзамен сдан от 50 баллов')]:
     s = s.replace(a, b)
 open(p, 'w', encoding='utf-8').write(s)
+
+# Превью ссылки в WhatsApp / Telegram: общая обложка курса + название экзамена
+U = 'https://dzhos7465-dotcom.github.io/tajweed-kurs/'
+og = ('<meta property="og:type" content="website">\n<meta property="og:title" content="Экзамен · второй уровень">\n'
+      '<meta property="og:description" content="Курс таджвида: 30 заданий по всем темам второго уровня">\n'
+      '<meta property="og:url" content="%sproverka/ekzamen.html">\n<meta property="og:image" content="%spreview.jpg">\n'
+      '<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta property="og:image:type" content="image/jpeg">\n'
+      '<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:image" content="%spreview.jpg">\n') % (U, U, U)
+s = open(p, encoding='utf-8').read()
+if 'og:image' not in s: s = s.replace('<title>', og + '<title>', 1)
+open(p, 'w', encoding='utf-8').write(s)
