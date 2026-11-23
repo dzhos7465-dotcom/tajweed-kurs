@@ -28,8 +28,9 @@ button{font-family:inherit;color:inherit}
 .top-cnt{font-weight:600;font-size:15px;color:var(--ink-mid);white-space:nowrap}
 .prog{height:5px;border-radius:3px;background:var(--line);margin-top:8px;overflow:hidden}
 .prog i{display:block;height:100%;background:var(--gold);border-radius:3px;transition:width .3s}
-.dots{display:flex;justify-content:space-between;gap:3px;margin-top:9px}
-.dot{flex:1;max-width:30px;height:26px;border-radius:13px;border:1.5px solid var(--line);background:#fff;font:600 12px var(--font-ui);color:var(--ink-soft);padding:0;cursor:pointer}
+.dots{position:relative;display:flex;gap:4px;margin-top:9px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+.dots::-webkit-scrollbar{display:none}
+.dot{flex:0 0 30px;height:26px;border-radius:13px;border:1.5px solid var(--line);background:#fff;font:600 12px var(--font-ui);color:var(--ink-soft);padding:0;cursor:pointer}
 .dot.done{background:var(--gold-light);border-color:var(--gold);color:var(--ink)}
 .dot.cur{border-color:var(--accent);box-shadow:0 0 0 2px rgba(30,58,95,.15);color:var(--accent)}
 .dot.r-ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
@@ -264,6 +265,7 @@ function renderTop(){
   else h+='<div class="prog"><i style="width:'+((S.cur+(S.chk[S.cur]?1:0))/D.tasks.length*100)+'%"></i></div>';
  }else h+='</div>';
  el.innerHTML=h;
+ var cd=el.querySelector('.dot.cur');if(cd){var dd=cd.parentNode;dd.scrollLeft=cd.offsetLeft-dd.clientWidth/2+cd.offsetWidth/2}
 }
 function bar(html){document.getElementById('bar').innerHTML=html;document.body.classList.toggle('nobar',!html)}
 function rStart(){
