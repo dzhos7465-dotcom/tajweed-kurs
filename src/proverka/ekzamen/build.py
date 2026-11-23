@@ -1,6 +1,6 @@
 # Экзамен второго уровня (23.11.2026) — полная версия пробного экзамена (задания из probnyj/data.py, режим 'k')
 # → proverka/ekzamen.html. Свой key: попытки не смешиваются с пробным экзаменом.
-import os, sys
+import os, sys, re
 H = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(H, '..', 'engine')); sys.path.insert(0, os.path.join(H, '..', 'probnyj'))
 import data
@@ -20,9 +20,9 @@ open(p, 'w', encoding='utf-8').write(s)
 U = 'https://dzhos7465-dotcom.github.io/tajweed-kurs/'
 og = ('<meta property="og:type" content="website">\n<meta property="og:title" content="Экзамен · второй уровень">\n'
       '<meta property="og:description" content="Курс таджвида: 30 заданий по всем темам второго уровня">\n'
-      '<meta property="og:url" content="%sproverka/ekzamen.html">\n<meta property="og:image" content="%spreview.jpg">\n'
+      '<meta property="og:url" content="%sproverka/ekzamen.html">\n<meta property="og:image" content="%spreview-ekzamen.jpg">\n'
       '<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta property="og:image:type" content="image/jpeg">\n'
-      '<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:image" content="%spreview.jpg">\n') % (U, U, U)
+      '<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:image" content="%spreview-ekzamen.jpg">\n') % (U, U, U)
 s = open(p, encoding='utf-8').read()
-if 'og:image' not in s: s = s.replace('<title>', og + '<title>', 1)
+s = re.sub(r'<meta (property|name)="(og|twitter):[^>]*>\n', '', s); s = s.replace('<title>', og + '<title>', 1)
 open(p, 'w', encoding='utf-8').write(s)
