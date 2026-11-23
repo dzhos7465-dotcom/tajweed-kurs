@@ -7,12 +7,12 @@ import data
 from common import build_work
 build_work(data.tasks, [('k', 'ekzamen.html', 'Экзамен по таджвиду', 'Экзамен')],
    key='ekzamen-2-v1', hero='ٱخۡتِبَارٌ', sub='заданий по всем пройденным темам',
-   group=True, gen=data.GEN, parts=data.PARTS)
+   group=True, gen=data.GEN, parts=data.PARTS, **{'pass': 70})
 
 # Надписи шаблона «контрольная» → «экзамен» (только в этом файле)
 p = os.path.join(H, '..', '..', '..', 'proverka', 'ekzamen.html'); s = open(p, encoding='utf-8').read()
 for a, b in [('Итог контрольной', 'Итог экзамена'), ('Контрольная сдана', 'Экзамен сдан'), ('Завершить контрольную?', 'Завершить экзамен?'),
-             ('Контрольная сдана от 50 баллов', 'Экзамен сдан от 50 баллов')]:
+             ('Контрольная сдана от ', 'Экзамен сдан от ')]:
     s = s.replace(a, b)
 open(p, 'w', encoding='utf-8').write(s)
 
