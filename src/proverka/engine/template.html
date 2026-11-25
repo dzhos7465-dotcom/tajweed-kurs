@@ -233,6 +233,7 @@ function grade(i){
  else{var g=0;max=Object.keys(t.targets).length;Object.keys(a).forEach(function(k){if(k in t.targets){if(okT(t,k,a[k]))g++}else if(!neu(t,k))g--});got=Math.max(0,g)}
  return{got:got,max:max};
 }
+function nokind(i){var a=S.ans[i],t=D.tasks[i];if(t.kind!=='tap'||!t.opts||Array.isArray(a))return false;return Object.keys(a).some(function(k){return a[k]==null})}
 function answered(i){var a=S.ans[i],t=D.tasks[i];return t.kind==='label'?Object.keys(a).length>0:(Array.isArray(a)?a.length>0:Object.keys(a).length>0)}
 function total(){var g=0,m=0;D.tasks.forEach(function(t,i){var r=grade(i);g+=r.got;m+=r.max});return{got:g,max:m,pct:Math.round(g/m*100)}}
 function shown(i){return MODE==='t'?S.chk[i]:S.scr==='review'}
@@ -261,7 +262,7 @@ function render(){auStop();closeOv();renderTop();var f={start:rStart,task:rTask,
 function renderTop(){
  var el=document.getElementById('top'),h='<div class="top-row"><div class="top-ttl">'+esc(D.short)+(S.retake?' · пересдача':'')+'</div>';
  if(S.scr==='task'||S.scr==='review'){h+='<div class="top-cnt">'+(MODE==='k'&&S.scr==='task'?'<span class="clk" id="clk">'+clk()+'</span> · ':'')+(S.scr==='review'?'Разбор · ':'')+'Задание '+(S.cur+1)+' из '+D.tasks.length+'</div></div>';
-  if(MODE==='k'){h+='<div class="dots">'+D.tasks.map(function(t,i){var c='dot';if(S.scr==='review'){var r=grade(i);c+=r.got===r.max?' r-ok':' r-bad'}else if(answered(i))c+=' done';if(i===S.cur)c+=' cur';return '<button class="'+c+'" onclick="go('+i+')">'+(i+1)+'</button>'}).join('')+'</div>'}
+  if(MODE==='k'){h+='<div class="dots">'+D.tasks.map(function(t,i){var c='dot';if(S.scr==='review'){var r=grade(i);c+=r.got===r.max?' r-ok':' r-bad'}else if(answered(i)&&!nokind(i))c+=' done';if(i===S.cur)c+=' cur';return '<button class="'+c+'" onclick="go('+i+')">'+(i+1)+'</button>'}).join('')+'</div>'}
   else h+='<div class="prog"><i style="width:'+((S.cur+(S.chk[S.cur]?1:0))/D.tasks.length*100)+'%"></i></div>';
  }else h+='</div>';
  el.innerHTML=h;
@@ -356,11 +357,13 @@ function tTap(t,i,ro){
    if(ro){if(!tg&&neu(t,k)){why='<div class="why"><b>Не учитывается.</b> Конец аята: здесь остановка, правило не действует. Балл не снимается.</div>'}
     else if(!tg){c+=' r-bad';why='<div class="why bad"><b>Лишняя отметка.</b> '+esc(t.extra||'Здесь нет длинного мадда из-за хамзы.')+'</div>'}
     else if(!m){why='<div class="why"><b>Пропущено.</b> Правильно: <b>'+t.targets[k]+'</b> — '+esc(ex(t,t.targets[k]))+'</div>'}
+    else if(a[k]==null){c+=' r-bad';why='<div class="why bad"><b>Вид не выбран.</b> Слово отмечено, но вид ниже не выбран. Правильно: <b>'+t.targets[k]+'</b> — '+esc(ex(t,t.targets[k]))+'</div>'}
     else if(a[k]===t.targets[k]){c+=' r-ok';why='<div class="why ok"><b>Верно.</b> '+esc(ex(t,t.targets[k]))+'</div>'}
     else if(okT(t,k,a[k])){c+=' r-ok';why='<div class="why ok"><b>Засчитано.</b> '+esc(t.alt[k][1])+'</div>'}
     else{c+=' r-bad';why='<div class="why bad"><b>Вид неверный.</b> Правильно: <b>'+t.targets[k]+'</b> — '+esc(ex(t,t.targets[k]))+'</div>'}}
    var ch='<div class="chips">'+t.opts.map(function(o){var cc='chip';if(a[k]===o)cc+=' sel';if(ro&&tg){if(o===t.targets[k]||(a[k]===o&&okT(t,k,o)))cc+=' c-ok';else if(a[k]===o)cc+=' c-bad'}else if(ro&&a[k]===o)cc+=' c-bad';
     return '<button class="'+cc+'" '+(ro?'disabled':'')+' onclick="setT(\''+k+'\',\''+o+'\')">'+o+'</button>'}).join('')+'</div>';
+   if(!ro&&a[k]==null){c+=' r-bad';why='<div class="why bad">Выберите вид для этого слова.</div>'}
    return '<div class="'+c+'" style="flex-wrap:wrap"><div class="mw">'+t.wtext[k]+'</div>'+ch+(why?'<div style="flex-basis:100%">'+why+'</div>':'')+'</div>';
   }).join('')+'</div>';
  }else if(ro){
@@ -371,11 +374,11 @@ function tTap(t,i,ro){
  return h;
 }
 function togT(k){var a=S.ans[S.cur];if(k in a)delete a[k];else a[k]=null;save();rTask();renderTop()}
-function setT(k,o){var a=S.ans[S.cur];a[k]=a[k]===o?null:o;save();rTask()}
+function setT(k,o){var a=S.ans[S.cur];a[k]=o;save();rTask();renderTop()}
 /* ---------- завершение ---------- */
 function askFinish(){
- var un=D.tasks.map(function(t,i){return answered(i)?0:i+1}).filter(Boolean);
- document.getElementById('ovl').innerHTML='<div class="ov"><div class="sheet"><h2>Завершить контрольную?</h2>'+(un.length?'<p>Без ответа задания: <b>'+un.join(', ')+'</b>.</p>':'<p>На все задания есть ответы.</p>')+'<p>После завершения изменить ответы будет нельзя.</p><div class="btns"><button class="btn sec" onclick="closeOv()">Вернуться</button><button class="btn gold" onclick="closeOv();finish()">Завершить</button></div></div></div>';
+ var un=D.tasks.map(function(t,i){return answered(i)?0:i+1}).filter(Boolean),nk=D.tasks.map(function(t,i){return nokind(i)?i+1:0}).filter(Boolean);
+ document.getElementById('ovl').innerHTML='<div class="ov"><div class="sheet"><h2>Завершить контрольную?</h2>'+(un.length?'<p>Без ответа задания: <b>'+un.join(', ')+'</b>.</p>':'<p>На все задания есть ответы.</p>')+(nk.length?'<p style="color:var(--bad)">Отмечены слова, но <b>не выбран вид</b> в заданиях: <b>'+nk.join(', ')+'</b>. Такие отметки не засчитываются.</p>':'')+'<p>После завершения изменить ответы будет нельзя.</p><div class="btns"><button class="btn sec" onclick="closeOv()">Вернуться</button><button class="btn gold" onclick="closeOv();finish()">Завершить</button></div></div></div>';
 }
 function finish(){if(MODE==='k'){S.t1=Date.now();S.scr='result'}else S.scr='result';save();render()}
 
